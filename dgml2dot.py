@@ -21,15 +21,24 @@ def to_dot(fd):
     print("Digraph G {")
     for node in root.findall("Nodes/Node[@Category='State']"):
         # print(node.attrib)
-        print('{} [label=\"{}"];'.format(node.attrib['Id'], node.attrib['Label']))
+        peripheries = ""
+        if node.findall("Category[@Ref='FinalState']"):
+            peripheries = ",peripheries=2"
+
+        print('{} [label=\"{}"{}];'.format(node.attrib['Id'], node.attrib['Label'], peripheries))
 
     for link in root.findall("Links/Link[@Category='NonepsilonTransition']"):
         # print(link.attrib)
         print('{} -> {} [label="{}"];'.format(
             link.attrib['Source'], link.attrib['Target'], link.attrib['Label']))
 
-    # for link in root.findall("Links/Link[@Category='StartTransition']"):
-    #     print(link.attrib)
+    init_cnt = 0
+    for link in root.findall("Links/Link[@Category='StartTransition']"):
+        init_state_name = 'init' + str(init_cnt)
+        init_cnt += 1
+
+        print('{} [label="",shape=plaintext];'.format(init_state_name))
+        print("{} -> {};".format(init_state_name, str(link.attrib['Target'])))
 
     print('}')
     return
